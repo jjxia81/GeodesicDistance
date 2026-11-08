@@ -115,6 +115,19 @@ int main(int argc, char** argv)
     const std::string prefix(argv[4]);
     std::ofstream csv(prefix + ".csv"), obj(prefix + ".obj");
     if (!csv || !obj) { std::cerr << "Could not open output files.\n"; return 7; }
+
+    std::set<unsigned> selected_ids;
+    for (const auto& pair : pairs) { selected_ids.insert(pair.first); selected_ids.insert(pair.second); }
+    std::ofstream selected_ply(prefix + "_selected_vertices.ply");
+    if (!selected_ply) { std::cerr << "Could not open selected-vertices PLY.\n"; return 8; }
+    selected_ply << "ply\nformat ascii 1.0\n"
+                 << "element vertex " << selected_ids.size() << "\n"
+                 << "property double x\nproperty double y\nproperty double z\n"
+                 << "property uint vertex_id\nend_header\n"
+                 << std::setprecision(12);
+    for (unsigned id : selected_ids)
+        selected_ply << vertices[3*id] << ' ' << vertices[3*id+1] << ' ' << vertices[3*id+2] << ' ' << id << '\n';
+
     csv << std::setprecision(12) << "source_vertex,target_vertex,exact_geodesic_distance,path_point_count\n";
     obj << std::setprecision(12) << "# Exact geodesic paths; one group per sampled vertex pair\n";
 

@@ -49,7 +49,10 @@ traced path as explicit OBJ line segments:
 ```
 
 The final argument is an optional random seed. This produces
-`results/random_paths.csv` and `results/random_paths.obj`.
+`results/random_paths.csv`, `results/random_paths.obj`, and
+`results/random_paths_selected_vertices.ply`. The PLY contains every unique
+vertex selected as an endpoint of a sampled pair, with its original zero-based
+`vertex_id` stored as a vertex property.
 
 ## License
 
