@@ -17,14 +17,25 @@ add_subdirectory(path/to/GeodesicDistance)
 target_link_libraries(your_target PRIVATE geodesic::distance)
 ```
 
-`geodesic::distance` is an interface target because the upstream implementation is header-implemented; client code receives the include path, C++14 requirement, and required MSVC compatibility definition without duplicate compiled definitions.
+`geodesic::distance` is a static-library target. It publishes the upstream headers, C++14 requirement, and required MSVC compatibility definition to consumers.
+
+For a compiled-library API that does not expose the header-implemented solver internals, include `geodesic_distance_api.h` and call:
+
+```cpp
+double distance = geodesic_distance::exact_vertex_distance(
+    vertices, faces, source_vertex_id, target_vertex_id);
+```
+
+`vertices` must contain `x, y, z` triples and `faces` must contain zero-based triangle-index triples.
 
 To build the upstream examples:
 
 ```powershell
-cmake -S . -B build -DGEODESIC_DISTANCE_BUILD_EXAMPLES=ON
+cmake -S . -B build
 cmake --build build --config Release
 ```
+
+For Unix Makefiles or Ninja, `cmake -S . -B build` defaults to a Release build; `cmake --build build` then builds `libgeodesic_distance.a` and all examples.
 
 ### Exact random vertex-pair example
 
