@@ -26,6 +26,20 @@ cmake -S . -B build -DGEODESIC_DISTANCE_BUILD_EXAMPLES=ON
 cmake --build build --config Release
 ```
 
+### Exact random vertex-pair example
+
+`ply_exact_random_pairs` reads an ASCII triangular PLY, a text file of permitted
+zero-based vertex IDs (one ID per line; `#` comments are allowed), and samples
+unique random pairs from that set. It writes exact distances to CSV and each
+traced path as explicit OBJ line segments:
+
+```powershell
+./build/Release/ply_exact_random_pairs mesh.ply vertex_ids.txt 20 results/random_paths 12345
+```
+
+The final argument is an optional random seed. This produces
+`results/random_paths.csv` and `results/random_paths.obj`.
+
 ## License
 
 The upstream source is distributed under the MIT License; see [LICENSE](LICENSE).

@@ -24,6 +24,9 @@ if(GEODESIC_DISTANCE_BUILD_EXAMPLES)
 
     add_executable(geodesic_example1 src/example1.cpp)
     target_link_libraries(geodesic_example1 PRIVATE geodesic::distance)
+
+    add_executable(ply_exact_random_pairs examples/ply_exact_random_pairs.cpp)
+    target_link_libraries(ply_exact_random_pairs PRIVATE geodesic::distance)
 endif()
 
 # Hessian VIPSS usage:
