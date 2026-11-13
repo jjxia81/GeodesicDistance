@@ -70,6 +70,25 @@ substantially slower and uses more memory than a target-limited path query.
 Append `--no-save-distance-fields` to skip distance-field export and use
 target-limited propagation instead.
 
+### Exact multi-source field from a point PLY
+
+`ply_multisource_distance_field` accepts an ASCII triangular mesh PLY and an
+ASCII PLY containing source-point positions. It projects every input point to
+its closest mesh triangle, constructs face-based `SurfacePoint` sources, and
+performs one exact multi-source propagation with an infinite distance limit:
+
+```powershell
+./build/Release/ply_multisource_distance_field mesh.ply source_points.ply results/multisource
+```
+
+It writes `multisource_projected_sources.ply` (projected positions, source IDs,
+face IDs, and projection distances), `multisource_distance_field.ply` (the
+original mesh topology with `quality` = exact distance and nearest `source_id`
+per vertex), and `multisource_timing.csv`.
+
+The solver supports sources inside faces directly; it is not necessary to
+retriangulate the mesh just to insert these points.
+
 ## License
 
 The upstream source is distributed under the MIT License; see [LICENSE](LICENSE).
