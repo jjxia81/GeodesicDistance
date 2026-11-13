@@ -57,16 +57,18 @@ propagation, traceback, and distance lookup durations. The PLY contains every un
 vertex selected as an endpoint of a sampled pair, with its original zero-based
 `vertex_id` stored as a vertex property.
 
-Append `--save-distance-fields` to write a complete exact distance field for
-each sampled source as `*_distance_field.ply`. Each PLY has a `quality`
+By default, the example writes a complete exact distance field for each sampled
+source as `*_distance_field.ply`. Each PLY has a `quality`
 property containing the geodesic distance at every mesh vertex:
 
 ```powershell
-./build/Release/ply_exact_random_pairs mesh.ply vertex_ids.txt 2 results/random_paths 12345 --save-distance-fields
+./build/Release/ply_exact_random_pairs mesh.ply vertex_ids.txt 2 results/random_paths 12345
 ```
 
-This mode performs full-mesh propagation for each pair, so it is substantially
-slower and uses more memory than the default target-limited path query.
+Distance-field export performs full-mesh propagation for each pair, so it is
+substantially slower and uses more memory than a target-limited path query.
+Append `--no-save-distance-fields` to skip distance-field export and use
+target-limited propagation instead.
 
 ## License
 

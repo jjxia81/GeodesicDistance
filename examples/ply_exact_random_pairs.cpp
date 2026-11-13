@@ -103,17 +103,17 @@ int main(int argc, char** argv)
     const Clock::time_point total_start = Clock::now();
     if (argc < 5 || argc > 7)
     {
-        std::cerr << "Usage: ply_exact_random_pairs mesh.ply vertex_ids.txt pair_count output_prefix [seed] [--save-distance-fields]\n";
+        std::cerr << "Usage: ply_exact_random_pairs mesh.ply vertex_ids.txt pair_count output_prefix [seed] [--no-save-distance-fields]\n";
         return 2;
     }
 
     const std::size_t requested_pairs = static_cast<std::size_t>(std::stoull(argv[3]));
     unsigned seed = 12345u;
-    bool save_distance_fields = false;
+    bool save_distance_fields = true;
     for (int i = 5; i < argc; ++i)
     {
         const std::string argument(argv[i]);
-        if (argument == "--save-distance-fields") save_distance_fields = true;
+        if (argument == "--no-save-distance-fields") save_distance_fields = false;
         else seed = static_cast<unsigned>(std::stoul(argument));
     }
     std::vector<double> vertices;
