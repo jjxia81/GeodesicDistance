@@ -76,18 +76,46 @@ static bool read_vertex_ids(const std::string& filename, std::vector<unsigned>& 
     return !ids.empty();
 }
 
+static bool write_distance_field_ply(const std::string& filename,
+                                     geodesic::Mesh& mesh,
+                                     geodesic::GeodesicAlgorithmExact& algorithm)
+{
+    std::ofstream output(filename);
+    if (!output) return false;
+    output << std::setprecision(12)
+           << "ply\nformat ascii 1.0\n"
+           << "element vertex " << mesh.vertices().size() << "\n"
+           << "property double x\nproperty double y\nproperty double z\n"
+           << "property double quality\nend_header\n";
+    for (unsigned i = 0; i < mesh.vertices().size(); ++i)
+    {
+        geodesic::SurfacePoint point(&mesh.vertices()[i]);
+        double distance = 0.0;
+        algorithm.best_source(point, distance);
+        output << point.x() << ' ' << point.y() << ' ' << point.z() << ' ' << distance << '\n';
+    }
+    return true;
+}
+
 int main(int argc, char** argv)
 {
     typedef std::chrono::steady_clock Clock;
     const Clock::time_point total_start = Clock::now();
-    if (argc != 5 && argc != 6)
+    if (argc < 5 || argc > 7)
     {
-        std::cerr << "Usage: ply_exact_random_pairs mesh.ply vertex_ids.txt pair_count output_prefix [seed]\n";
+        std::cerr << "Usage: ply_exact_random_pairs mesh.ply vertex_ids.txt pair_count output_prefix [seed] [--save-distance-fields]\n";
         return 2;
     }
 
     const std::size_t requested_pairs = static_cast<std::size_t>(std::stoull(argv[3]));
-    const unsigned seed = argc == 6 ? static_cast<unsigned>(std::stoul(argv[5])) : 12345u;
+    unsigned seed = 12345u;
+    bool save_distance_fields = false;
+    for (int i = 5; i < argc; ++i)
+    {
+        const std::string argument(argv[i]);
+        if (argument == "--save-distance-fields") save_distance_fields = true;
+        else seed = static_cast<unsigned>(std::stoul(argument));
+    }
     std::vector<double> vertices;
     std::vector<unsigned> faces, vertex_ids;
     const Clock::time_point mesh_read_start = Clock::now();
@@ -162,7 +190,8 @@ int main(int argc, char** argv)
         geodesic::GeodesicAlgorithmExact algorithm(&mesh);
         const double solver_construction_seconds = std::chrono::duration<double>(Clock::now() - solver_construction_start).count();
         const Clock::time_point propagation_start = Clock::now();
-        algorithm.propagate(sources, geodesic::GEODESIC_INF, &stop_points);
+        if (save_distance_fields) algorithm.propagate(sources);
+        else algorithm.propagate(sources, geodesic::GEODESIC_INF, &stop_points);
         const double propagation_seconds = std::chrono::duration<double>(Clock::now() - propagation_start).count();
         const Clock::time_point trace_back_start = Clock::now();
         algorithm.trace_back(target, path);
@@ -177,6 +206,21 @@ int main(int argc, char** argv)
                << "propagate," << pair_index << ',' << pair.first << ',' << pair.second << ',' << propagation_seconds << '\n'
                << "trace_back," << pair_index << ',' << pair.first << ',' << pair.second << ',' << trace_back_seconds << '\n'
                << "distance_lookup," << pair_index << ',' << pair.first << ',' << pair.second << ',' << distance_lookup_seconds << '\n';
+
+        if (save_distance_fields)
+        {
+            std::ostringstream filename;
+            filename << prefix << "_pair_" << std::setw(4) << std::setfill('0') << pair_index
+                     << "_source_" << pair.first << "_distance_field.ply";
+            const Clock::time_point field_write_start = Clock::now();
+            if (!write_distance_field_ply(filename.str(), mesh, algorithm))
+            {
+                std::cerr << "Could not write distance field PLY.\n";
+                return 10;
+            }
+            timing << "write_distance_field," << pair_index << ',' << pair.first << ',' << pair.second << ','
+                   << std::chrono::duration<double>(Clock::now() - field_write_start).count() << '\n';
+        }
 
         obj << "g path_" << pair.first << "_to_" << pair.second << '\n';
         for (auto& point : path) obj << "v " << point.x() << ' ' << point.y() << ' ' << point.z() << '\n';
