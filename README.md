@@ -50,7 +50,10 @@ traced path as explicit OBJ line segments:
 
 The final argument is an optional random seed. This produces
 `results/random_paths.csv`, `results/random_paths.obj`, and
-`results/random_paths_selected_vertices.ply`. The PLY contains every unique
+`results/random_paths_selected_vertices.ply`, plus
+`results/random_paths_timing.csv`. The timing CSV records mesh/ID loading,
+pair sampling, mesh initialization, and per-pair solver construction,
+propagation, traceback, and distance lookup durations. The PLY contains every unique
 vertex selected as an endpoint of a sampled pair, with its original zero-based
 `vertex_id` stored as a vertex property.
 
